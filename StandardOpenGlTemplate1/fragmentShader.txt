@@ -1,0 +1,118 @@
+#version 330 core
+#define nr_point_light 4;
+struct Material{
+	sampler2D diffuse;
+	sampler2D specular;
+	sampler2D hidden;
+	float shininess;
+};
+struct Light{
+	vec3 Position;
+
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+
+	float constant;
+	float linear;
+	float quadratic;
+};
+struct DirLight{
+	vec3 direction;
+
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+};
+struct FlashLight{
+	vec3 Position;
+	vec3 direction;
+	float cutoff;
+	float outerCutoff;
+
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+
+	float constant;
+	float linear;
+	float quadratic;
+};
+in vec3 FragPos;
+in vec3 Normal;
+in vec2 TextCoords;
+out vec4 FragColor;
+
+uniform vec3 viewPos;
+uniform vec3 lightColor;
+
+
+uniform Material material;
+uniform FlashLight flash;
+uniform Light light;
+uniform DirLight dirLight;
+
+vec3 CalcDirLight(DirLight light,vec3 normal,vec3 viewDir);
+vec3 CalcPointLight(Light light,vec3 normal,vec3 fragPos,vec3 viewDir);
+vec3 CalcFlashLight(FlashLight light,vec3 normal,vec3 fragPos,vec3 viewDir);
+
+void main(){
+	vec3 result;
+	vec3 viewDir=normalize(viewPos-FragPos);
+
+	//result=CalcDirLight(dirLight,Normal,viewDir);
+	//result+=CalcFlashLight(flash,Normal,FragPos,viewDir);
+		result+=CalcPointLight(light,Normal,FragPos,viewDir);
+	vec4 textColor=texture(material.diffuse,TextCoords);
+	FragColor=textColor;
+}
+
+vec3 CalcDirLight(DirLight light,vec3 normal,vec3 viewDir){
+	vec3 lightDir=-1.f*light.direction;
+	float diff=dot(lightDir,normal);
+	diff=max(diff,0.f);
+	vec3 h=normalize(lightDir+viewDir);
+	float spec=pow(max(dot(h,normal),0.f),material.shininess);
+	spec=max(spec,0.f);
+
+	vec3 ambient=light.ambient*vec3(texture(material.diffuse,TextCoords));
+	vec3 diffuse=light.diffuse*diff*vec3(texture(material.diffuse,TextCoords));
+	vec3 specular=light.specular*spec*vec3(texture(material.specular,TextCoords));
+
+	return ambient+diffuse+specular;
+}
+
+vec3 CalcPointLight(Light light,vec3 normal,vec3 fragPos,vec3 viewDir){
+	vec3 lightDir=normalize(light.Position-fragPos);
+	float diff=max(dot(lightDir,normal),0.f);
+	vec3 h=normalize(lightDir+viewDir);
+	float spec=pow(max(dot(h,normal),0.f),material.shininess);
+
+	float distance=length(fragPos-light.Position);
+	float attention=1.f/(light.constant+light.linear*distance+light.quadratic*distance*distance);
+
+	vec3 ambient=light.ambient*vec3(texture(material.diffuse,TextCoords));
+	vec3 diffuse=light.diffuse*diff*vec3(texture(material.diffuse,TextCoords))*attention;
+	vec3 specular=light.specular*spec*vec3(texture(material.specular,TextCoords))*attention;
+	return ambient+diffuse+specular;
+}
+
+vec3 CalcFlashLight(FlashLight light,vec3 normal,vec3 fragPos,vec3 viewDir){
+	vec3 lightDir=normalize(fragPos-light.Position);
+	float theta=dot(lightDir,light.direction);
+	float intensity=(light.outerCutoff-theta)/(light.outerCutoff-light.cutoff);
+	intensity=clamp(intensity,0.f,1.f);
+
+	float distance=length(fragPos-light.Position);
+	float attention=1.f;//(light.constant+light.linear*distance+light.quadratic*distance*distance);
+	
+	float diff=max(0.f,dot(-lightDir,normal));
+	 vec3 h=normalize(viewDir-lightDir);
+	float spec=pow(max(dot(h,normal),0.f),32);
+	spec=max(spec,0.f);
+
+	vec3 ambient=light.ambient*vec3(texture(material.diffuse,TextCoords));
+	vec3 diffuse=light.diffuse*diff*vec3(texture(material.hidden,TextCoords))*attention*intensity;
+	vec3 specular=light.specular*spec*vec3(texture(material.hidden,TextCoords))*attention*intensity;
+	return ambient+diffuse;//+specular;
+}
