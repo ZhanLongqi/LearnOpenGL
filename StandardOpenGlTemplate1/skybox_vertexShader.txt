@@ -1,0 +1,12 @@
+#version 330 core
+layout(location=0) in vec3 aPos;
+out vec3 TextCoord;
+
+uniform mat4 projMat;
+uniform mat4 viewMat;
+
+void main(){
+	TextCoord=aPos;
+	vec4 pos=projMat*viewMat*vec4(aPos,1.f);
+	gl_Position=vec4(pos.x,pos.y,pos.w,pos.w);
+}

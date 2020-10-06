@@ -165,6 +165,8 @@
     <Text Include="renderVertexShader.txt" />
     <Text Include="shadowShader.txt" />
     <Text Include="skyboxShader.txt" />
+    <Text Include="skybox_fragmentShader.txt" />
+    <Text Include="skybox_vertexShader.txt" />
     <Text Include="vertexShader.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -182,6 +184,12 @@
     <Image Include="container2_specular.png" />
     <Image Include="grass.png" />
     <Image Include="leimu.png" />
+    <Image Include="skybox\back.jpg" />
+    <Image Include="skybox\bottom.jpg" />
+    <Image Include="skybox\front.jpg" />
+    <Image Include="skybox\left.jpg" />
+    <Image Include="skybox\right.jpg" />
+    <Image Include="skybox\top.jpg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
