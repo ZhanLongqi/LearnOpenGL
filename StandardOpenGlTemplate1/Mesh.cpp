@@ -19,20 +19,25 @@ void Mesh::Draw(Shader& shader)
 {
 	unsigned int diffuseNum = 1;
 	unsigned int specularNum = 1;
-	unsigned int normalNum = 1;
+	unsigned int reflectNum = 1;
 	unsigned inti;
 
 	for (unsigned int i = 0; i < textures.size(); i++) {
-	if (textures[i].type == "texture_diffuse") {
-		glActiveTexture(GL_TEXTURE0+i);
+		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
+			  // retrieve texture number (the N in diffuse_textureN)
+		std::string number;
+		std::string name = textures[i].type;
+		if (name == "material.diffuse")
+			number = std::to_string(diffuseNum++);
+		else if (name == "material.specular")
+			number = std::to_string(specularNum++); // transfer unsigned int to stream
+		else if (name == "material.ambient")
+			number = std::to_string(reflectNum++);
+
+		// now set the sampler to the correct texture unit
+		glUniform1i(glGetUniformLocation(shader.ID, (name+number).c_str()), i);
+		// and finally bind the texture
 		glBindTexture(GL_TEXTURE_2D, textures[i].id);
-		glUniform1i(glGetUniformLocation(shader.ID, "material.diffuse"), i);
-	}
-	else if (textures[i].type == "texture_specular") {
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, textures[i].id);
-		glUniform1i(glGetUniformLocation(shader.ID, "material.specular"), i);
-	}
 	}
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);

@@ -41,6 +41,9 @@
     <Text Include="renderFragmentShader.txt" />
     <Text Include="skybox_vertexShader.txt" />
     <Text Include="skybox_fragmentShader.txt" />
+    <Text Include="reflectiveFragmentShader.txt" />
+    <Text Include="reflectiveVertexShader.txt" />
+    <Text Include="transparentFragmentShader.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">

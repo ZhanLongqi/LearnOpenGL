@@ -161,12 +161,15 @@
   <ItemGroup>
     <Text Include="fragmentShader.txt" />
     <Text Include="LightShader.txt" />
+    <Text Include="reflectiveFragmentShader.txt" />
+    <Text Include="reflectiveVertexShader.txt" />
     <Text Include="renderFragmentShader.txt" />
     <Text Include="renderVertexShader.txt" />
     <Text Include="shadowShader.txt" />
     <Text Include="skyboxShader.txt" />
     <Text Include="skybox_fragmentShader.txt" />
     <Text Include="skybox_vertexShader.txt" />
+    <Text Include="transparentFragmentShader.txt" />
     <Text Include="vertexShader.txt" />
   </ItemGroup>
   <ItemGroup>

@@ -1,9 +1,10 @@
 #version 330 core
 #define nr_point_light 4;
 struct Material{
-	sampler2D diffuse;
-	sampler2D specular;
-	sampler2D hidden;
+	sampler2D diffuse1;
+	sampler2D specular1;
+	sampler2D ambient1;
+	sampler2D hidden1;
 	float shininess;
 };
 struct Light{
@@ -51,20 +52,21 @@ uniform Material material;
 uniform FlashLight flash;
 uniform Light light;
 uniform DirLight dirLight;
+uniform samplerCube skybox;
 
 vec3 CalcDirLight(DirLight light,vec3 normal,vec3 viewDir);
 vec3 CalcPointLight(Light light,vec3 normal,vec3 fragPos,vec3 viewDir);
 vec3 CalcFlashLight(FlashLight light,vec3 normal,vec3 fragPos,vec3 viewDir);
-
+vec4 CalcReflective(vec3 normal);
 void main(){
 	vec3 result;
 	vec3 viewDir=normalize(viewPos-FragPos);
 
 	//result=CalcDirLight(dirLight,Normal,viewDir);
 	//result+=CalcFlashLight(flash,Normal,FragPos,viewDir);
-		result+=CalcPointLight(light,Normal,FragPos,viewDir);
-	vec4 textColor=texture(material.diffuse,TextCoords);
-	FragColor=textColor;
+		//result+=CalcPointLight(light,Normal,FragPos,viewDir);
+	vec4 textColor=texture(material.diffuse1,TextCoords);
+	FragColor=CalcReflective(Normal)+textColor;
 }
 
 vec3 CalcDirLight(DirLight light,vec3 normal,vec3 viewDir){
@@ -75,11 +77,18 @@ vec3 CalcDirLight(DirLight light,vec3 normal,vec3 viewDir){
 	float spec=pow(max(dot(h,normal),0.f),material.shininess);
 	spec=max(spec,0.f);
 
-	vec3 ambient=light.ambient*vec3(texture(material.diffuse,TextCoords));
-	vec3 diffuse=light.diffuse*diff*vec3(texture(material.diffuse,TextCoords));
-	vec3 specular=light.specular*spec*vec3(texture(material.specular,TextCoords));
+	vec3 ambient=light.ambient*vec3(texture(material.diffuse1,TextCoords));
+	vec3 diffuse=light.diffuse*diff*vec3(texture(material.diffuse1,TextCoords));
+	vec3 specular=light.specular*spec*vec3(texture(material.specular1,TextCoords));
 
 	return ambient+diffuse+specular;
+}
+
+vec4 CalcReflective(vec3 normal){
+	vec3 I=normalize(FragPos-viewPos);
+	vec3 R=reflect(I,normalize(normal));
+	return texture(material.ambient1,TextCoords)*texture(skybox,R);
+
 }
 
 vec3 CalcPointLight(Light light,vec3 normal,vec3 fragPos,vec3 viewDir){
@@ -91,9 +100,9 @@ vec3 CalcPointLight(Light light,vec3 normal,vec3 fragPos,vec3 viewDir){
 	float distance=length(fragPos-light.Position);
 	float attention=1.f/(light.constant+light.linear*distance+light.quadratic*distance*distance);
 
-	vec3 ambient=light.ambient*vec3(texture(material.diffuse,TextCoords));
-	vec3 diffuse=light.diffuse*diff*vec3(texture(material.diffuse,TextCoords))*attention;
-	vec3 specular=light.specular*spec*vec3(texture(material.specular,TextCoords))*attention;
+	vec3 ambient=light.ambient*vec3(texture(material.diffuse1,TextCoords));
+	vec3 diffuse=light.diffuse*diff*vec3(texture(material.diffuse1,TextCoords))*attention;
+	vec3 specular=light.specular*spec*vec3(texture(material.specular1,TextCoords))*attention;
 	return ambient+diffuse+specular;
 }
 
@@ -111,8 +120,8 @@ vec3 CalcFlashLight(FlashLight light,vec3 normal,vec3 fragPos,vec3 viewDir){
 	float spec=pow(max(dot(h,normal),0.f),32);
 	spec=max(spec,0.f);
 
-	vec3 ambient=light.ambient*vec3(texture(material.diffuse,TextCoords));
-	vec3 diffuse=light.diffuse*diff*vec3(texture(material.hidden,TextCoords))*attention*intensity;
-	vec3 specular=light.specular*spec*vec3(texture(material.hidden,TextCoords))*attention*intensity;
+	vec3 ambient=light.ambient*vec3(texture(material.diffuse1,TextCoords));
+	vec3 diffuse=light.diffuse*diff*vec3(texture(material.hidden1,TextCoords))*attention*intensity;
+	vec3 specular=light.specular*spec*vec3(texture(material.hidden1,TextCoords))*attention*intensity;
 	return ambient+diffuse;//+specular;
 }

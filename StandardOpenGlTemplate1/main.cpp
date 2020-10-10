@@ -53,15 +53,16 @@ int main(int argc,char* argv[]) {
 		return -1;
 	}
 	Shader shader("vertexShader.txt", "fragmentShader.txt");
-	Shader lightShader("vertexShader.txt", "LightShader.txt");
-	Shader renderShader("renderVertexShader.txt", "renderFragmentShader.txt");
+	//Shader lightShader("vertexShader.txt", "LightShader.txt");
+	//Shader renderShader("renderVertexShader.txt", "renderFragmentShader.txt");
+	//Shader shader("reflectiveVertexShader.txt", "transparentFragmentShader.txt");
 	Shader skyboxShader("skybox_vertexShader.txt", "skybox_fragmentShader.txt");
-	//Model model("C:\\work\\cpp\\OpenglExerciseProj02\\StandardOpenGlTemplate1\\nanosuit\\nanosuit.obj");
-	Model lightModel("C:\\work\\cpp\\OpenglExerciseProj02\\StandardOpenGlTemplate1\\cube\\cube.obj");
+	Model model("C:\\work\\cpp\\Opengl\\LeranOpenglExercise02-master\\nanosuit_reflection\\nanosuit.obj");
+	//Model lightModel("C:\\work\\cpp\\OpenglExerciseProj02\\StandardOpenGlTemplate1\\cube\\cube.obj");
 
 
-	loadTexture("blending_transparent_window.png", 1);
-	loadTexture("bobobo.jpg", 2);
+	//loadTexture("blending_transparent_window.png", 1);
+//	loadTexture("bobobo.jpg", 2);
 
 	std::vector<std::string> faces{
 		"skybox\\right.jpg",
@@ -140,18 +141,23 @@ int main(int argc,char* argv[]) {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 			
 				shader.use();
-				glUniform1i(glGetUniformLocation(shader.ID, "material.diffuse"), 2);
+				//glUniform1i(glGetUniformLocation(shader.ID, "material.diffuse"), 2);
 				glUniformMatrix4fv(glGetUniformLocation(shader.ID, "modelMat"), 1, GL_FALSE, glm::value_ptr(modelMat));
 				glUniformMatrix4fv(glGetUniformLocation(shader.ID, "viewMat"), 1, GL_FALSE, glm::value_ptr(viewMat));
 				glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projMat"), 1, GL_FALSE, glm::value_ptr(projMat));
-				glUniform3f(glGetUniformLocation(shader.ID, "light.Position"), lightPos.x, lightPos.y, lightPos.z);
-				glUniform3f(glGetUniformLocation(shader.ID, "light.ambient"), 1.f, 1.f, 1.f);
-				glUniform3f(glGetUniformLocation(shader.ID, "light.diffuse"), 1.f, 1.f, 1.f);
-				glUniform3f(glGetUniformLocation(shader.ID, "light.specular"), 1.f, 1.f, 1.f);
-				glUniform1f(glGetUniformLocation(shader.ID, "light.constant"), 1.f);
-				glUniform1f(glGetUniformLocation(shader.ID, "light.linear"), 0.09);
-				glUniform1f(glGetUniformLocation(shader.ID, "light.quadratic"), 0.0032);
-				lightModel.Draw(renderShader);
+				glUniform3f(glGetUniformLocation(shader.ID, "viewPos"), camera.Postion.x,camera.Postion.y,camera.Postion.z);
+				glActiveTexture(GL_TEXTURE4);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+				glUniform1i(glGetUniformLocation(shader.ID, "skybox"), 4);
+			//	glUniform3f(glGetUniformLocation(shader.ID, "light.Position"), lightPos.x, lightPos.y, lightPos.z);
+			//glUniform3f(glGetUniformLocation(shader.ID, "light.ambient"), 1.f, 1.f, 1.f);
+			//glUniform3f(glGetUniformLocation(shader.ID, "light.diffuse"), 1.f, 1.f, 1.f);
+			//glUniform3f(glGetUniformLocation(shader.ID, "light.specular"), 1.f, 1.f, 1.f);
+			//glUniform1f(glGetUniformLocation(shader.ID, "light.constant"), 1.f);
+			//glUniform1f(glGetUniformLocation(shader.ID, "light.linear"), 0.09);
+			//glUniform1f(glGetUniformLocation(shader.ID, "light.quadratic"), 0.0032);
+				model.Draw(shader);
 			
 				glDepthFunc(GL_LEQUAL);
 				skyboxShader.use();
