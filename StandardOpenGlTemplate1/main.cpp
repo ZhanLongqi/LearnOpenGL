@@ -12,6 +12,7 @@
 #include"stb_image.h"
 #include<map>
 #include<vector>
+//fuck fuck fuck
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xPos, double yPos);
 unsigned int loadCubemap(std::vector<std::string> faces);
